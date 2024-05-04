@@ -8,57 +8,25 @@ import torch.optim as optim
 class Net(nn.Module):
 
     def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(3, 3, 15)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(2, 2, 30)
-        self.fc1 = nn.Linear(30 * 15 * 15, 29)
+        super(Net, self).__init__()
+        self.conv1 = nn.Conv2d(1, 32, 3, 1)
+        self.conv2 = nn.Conv2d(32, 64, 3, 1)
+        self.dropout1 = nn.Dropout(0.25)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc1 = nn.Linear(9216, 128)
+        self.fc2 = nn.Linear(128, 29)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1) 
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.max_pool2d(x, 2)
+        x = self.dropout1(x)
+        x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
-        return x
-
-    def train(self, trainloader):
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
-
-        for epoch in range(10):
-
-            running_loss = 0.0
-            for i, data in enumerate(trainloader, 0):
-                inputs, labels = data[0].to(device), data[1].to(device)
-
-                optimizer.zero_grad()
-
-                outputs = self(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-
-                running_loss += loss.item()
-                if i % 100 == 99:    # print every 100 mini-batches
-                    print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 100:.3f}')
-                    running_loss = 0.0
-
-        print('Finished Training')
-
-    def evaluate(self, testloader):
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for data in testloader:
-                images, labels = data
-                outputs = self(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-        print(f'Tacnost mreze: {100 * correct // total} %')
+        x = self.dropout2(x)
+        x = self.fc2(x)
+        output = F.log_softmax(x, dim=1)
+        return output
 
     def save_model(self, path):
         torch.save(self.state_dict(), path)

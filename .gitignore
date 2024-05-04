@@ -2,3 +2,5 @@
 /asl_alphabet_test
 data.npy
 labels.npy
+data_gray.npy
+data_resized.npy
