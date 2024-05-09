@@ -4,3 +4,9 @@ data.npy
 labels.npy
 data_gray.npy
 data_resized.npy
+train_data.npy
+train_labels.npy
+test_data.npy
+test_labels.npy
+model.h5
+model.pth
