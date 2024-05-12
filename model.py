@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 import torch.optim as optim
 
-
+# Formiraje modela
 class Net(nn.Module):
     def __init__(self, input_shape=[3, 5, 5], num_classes=29, conv_layers=[16, 32], fc_layers=[120, 84], strides=[5, 5]):
         super(Net, self).__init__()
